@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ServerSocket
 {
@@ -65,16 +66,24 @@ namespace ServerSocket
 												  .ConfigureAwait(false);
 					if (completedTask == timeoutTask)
 					{
-						var msg = Encoding.ASCII.GetBytes(@"Client timed out
-");
+						var msg = Encoding.ASCII.GetBytes(@"Client timed out: ");
 						await stream.WriteAsync(msg, 0, msg.Length);
 						break;
 					}
 					//now we know that the amountTask is complete so
 					//we can ask for its Result without blocking
 					var amountRead = amountReadTask.Result;
-					string recv = Encoding.ASCII.GetString(buf);
-					Console.WriteLine(recv);
+					string recv = Encoding.ASCII.GetString(buf.Take(amountRead).ToArray());
+					Console.Write(recv);
+
+					//if client sends quit close connection
+					if (recv.TrimEnd().Equals("quit", StringComparison.OrdinalIgnoreCase))
+					{
+						var msg = Encoding.ASCII.GetBytes(@"Client quitting: ");
+						await stream.WriteAsync(msg, 0, msg.Length);
+						break;
+
+					}
 
 					byte[] response = Encoding.ASCII.GetBytes("server says: " + recv);
 					if (amountRead == 0) break; //end of stream.
