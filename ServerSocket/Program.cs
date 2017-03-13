@@ -13,7 +13,7 @@ namespace ServerSocket
 		public static void Main(string[] args)
 		{
 			CancellationTokenSource cts = new CancellationTokenSource();
-			TcpListener listener = new TcpListener(IPAddress.Any, 6666);
+			TcpListener listener = new TcpListener(IPAddress.Any,6666);
 			try
 			{
 				listener.Start();
@@ -24,6 +24,7 @@ namespace ServerSocket
 				Thread.Sleep(60000); //block here to hold open the server
 				Console.WriteLine("Closing server");
 			}
+
 			finally
 			{
 				cts.Cancel();
@@ -73,8 +74,8 @@ namespace ServerSocket
 					//now we know that the amountTask is complete so
 					//we can ask for its Result without blocking
 					var amountRead = amountReadTask.Result;
-					string recv = Encoding.ASCII.GetString(buf);
-					Console.Write("El client {clientIndex} envia: ",recv);
+					string recv = Encoding.ASCII.GetString(buf.Take(amountRead).ToArray());					
+					Console.Write("El client {0} envia: {1}",clientIndex,recv);
 
 					//if client sends quit close connection
 					if (recv.TrimEnd().Equals("quit", StringComparison.OrdinalIgnoreCase))
@@ -90,8 +91,11 @@ namespace ServerSocket
 					await stream.WriteAsync(response, 0, response.Length, ct)
 								.ConfigureAwait(false);
 				}
+				stream.Dispose();
 			}
 			Console.WriteLine("Client ({0}) disconnected", clientIndex);
+
 		}
+
 	}
 }
