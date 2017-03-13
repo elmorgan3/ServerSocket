@@ -73,8 +73,8 @@ namespace ServerSocket
 					//now we know that the amountTask is complete so
 					//we can ask for its Result without blocking
 					var amountRead = amountReadTask.Result;
-					string recv = Encoding.ASCII.GetString(buf.Take(amountRead).ToArray());
-					Console.Write(recv);
+					string recv = Encoding.ASCII.GetString(buf);
+					Console.Write("El client {clientIndex} envia: ",recv);
 
 					//if client sends quit close connection
 					if (recv.TrimEnd().Equals("quit", StringComparison.OrdinalIgnoreCase))
